@@ -33,9 +33,16 @@
     authButton.disabled=!tokenClient;
     setAuthStatus(message);
   }
-  async function fetchSheetData(accessToken,version) {
-    const ranges=['月度KPI!A1:Y100','Meta月度KPI!A1:T100','年度預算!A1:R100','月報總覽!A1:P40','分店消費!A1:Q1000'];
-    const query=ranges.map(range=>'ranges='+encodeURIComponent(range)).join('&');
+  const rangeSpecs=[
+    {sheet:'月度KPI',range:'月度KPI!A1:Y100'},
+    {sheet:'Meta月度KPI',range:'Meta月度KPI!A1:T100'},
+    {sheet:'年度預算',range:'年度預算!A1:R100'},
+    {sheet:'月報總覽',range:'月報總覽!A1:P40'},
+    {sheet:'分店消費',range:'分店消費!A1:Q1000'}
+  ];
+  const sheetName=value=>String(value||'').split('!')[0].replace(/^'|'$/g,'').replace(/''/g,"'");
+  async function fetchRanges(accessToken,specs) {
+    const query=specs.map(spec=>'ranges='+encodeURIComponent(spec.range)).join('&');
     const endpoint='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(config.sheetId)+'/values:batchGet?'+query+'&majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE';
     const response=await fetch(endpoint,{headers:{Authorization:'Bearer '+accessToken},cache:'no-store',signal:AbortSignal.timeout(20000)});
     if(!response.ok) {
@@ -43,7 +50,21 @@
       if(response.status===401) throw new Error('Google 登入已到期，請重新登入。');
       throw new Error('Google Sheets 讀取失敗 ('+response.status+')。');
     }
-    const payload=await response.json(),next=parseAll(payload.valueRanges||[]);
+    const payload=await response.json(),valueRanges=payload.valueRanges||[];
+    const bySheet=new Map(valueRanges.filter(item=>item.range).map(item=>[sheetName(item.range),item]));
+    return specs.map((spec,index)=>bySheet.get(spec.sheet)||(!valueRanges[index]?.range?valueRanges[index]:undefined)||{values:[]});
+  }
+  async function fetchSheetData(accessToken,version) {
+    const ordered=await fetchRanges(accessToken,rangeSpecs);
+    let next;
+    try {
+      next=parseAll(ordered);
+    } catch(error) {
+      if(!/年度預算須具備十二個月份與兩個平台/.test(error.message)) throw error;
+      // A transient partial batch response must not send an authorized user back to the login wall.
+      [ordered[2]]=await fetchRanges(accessToken,[rangeSpecs[2]]);
+      next=parseAll(ordered);
+    }
     if(version!==requestVersion) return false;
     ({newRows,metaRows,budgetRows,consumptionRows}=next);
     return true;
