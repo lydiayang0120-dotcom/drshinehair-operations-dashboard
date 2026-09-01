@@ -20,6 +20,8 @@
   const selected = row => row['品牌代碼'] === 'JY' && Number(row['年度歸屬']) === 2026;
   const storeCodes = ['ty','jc','sx'];
   const storeCode = value => value === '桃園漾澤' ? 'ty' : value === '江翠漾澤' ? 'jc' : value === '三峽漾澤' ? 'sx' : null;
+  const metaCodes = [...storeCodes,'brand'];
+  const metaCode = value => storeCode(value) || (value === '品牌整體' ? 'brand' : null);
   const sumComplete = values => values.length && values.every(Number.isFinite) ? values.reduce((a,b)=>a+b,0) : null;
   function monthIndex(row, field) {
     const index = required(row[field]) - 1;
@@ -62,7 +64,7 @@
     const grouped = new Map();
     for (const row of records(values, ['月份','品牌代碼','年度歸屬','月序','分店','實際花費','訊息花費','Meta詢問數','Meta預算','資料完整性','查詢備註'])) {
       if (!selected(row)) continue;
-      const key = storeCode(row['分店']);
+      const key = metaCode(row['分店']);
       if (!key) throw new Error('Meta 工作表出現未設定的分店。');
       // Existing pending rows contain placeholder zeroes; keep those unknown.
       const pending = String(row['查詢備註'] || '').includes('該分店資料待補') || /待補|待匯入/.test(row['資料完整性'] || '');
@@ -73,7 +75,7 @@
       if (value.ms !== null && value.s !== null && value.ms > value.s) throw new Error('訊息花費大於全部花費，請核對來源。');
       add(grouped, monthIndex(row, '月序'), key, value);
     }
-    return sorted(grouped).map(row => ({...row, ...Object.fromEntries(storeCodes.map(code=>[code,row[code]||missingMeta()]))}));
+    return sorted(grouped).map(row => ({...row, ...Object.fromEntries(metaCodes.map(code=>[code,row[code]||missingMeta()]))}));
   }
   function parseBudgetRows(values) {
     const grouped = new Map();
@@ -91,13 +93,14 @@
   }
   const sumKnown = values => values.every(value => value === null) ? null : values.reduce((total, value) => total + (value ?? 0), 0);
   const stores = (row, store) => store === 'all' ? storeCodes.map(code=>row[code]) : [row[store]];
+  const metaStores = (row, store) => store === 'all' ? metaCodes.map(code=>row[code]) : [row[store]];
   function newTotal(rows,store='all') {
     const list=rows.flatMap(row=>stores(row,store));
     const a=sumComplete(list.map(item=>item.a)),t=sumComplete(list.map(item=>item.t));
     return {a,t,d:t===null||a===null?null:a-t,rate:t>0?a/t:null};
   }
   function metaTotal(rows, store) {
-    const list = rows.flatMap(row => stores(row, store));
+    const list = rows.flatMap(row => metaStores(row, store));
     const pairs = list.filter(item => item.s !== null && item.b !== null);
     const messages = list.filter(item => item.ms !== null && item.q !== null);
     const result = Object.fromEntries(['s','ms','q','b'].map(key => [key, sumKnown(list.map(item => item[key]))]));
