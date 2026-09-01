@@ -17,7 +17,8 @@
     if (fields.some(field => !header.includes(field))) throw new Error('來源工作表欄位不符，停止顯示以避免誤算。');
     return rows.filter(row => row.some(value => value !== null && value !== '')).map(row => Object.fromEntries(header.map((key, i) => [key, row[i] ?? null])));
   }
-  const selected = row => row['品牌代碼'] === 'JY' && Number(row['年度歸屬']) === 2026;
+  const isBrand = row => row['品牌代碼'] === 'JY' || row['品牌代碼'] === 'YJ';
+  const selected = row => isBrand(row) && Number(row['年度歸屬']) === 2026;
   const storeCodes = ['ty','jc','sx'];
   const storeCode = value => value === '桃園漾澤' ? 'ty' : value === '江翠漾澤' ? 'jc' : value === '三峽漾澤' ? 'sx' : null;
   const metaCodes = [...storeCodes,'brand'];
@@ -139,7 +140,7 @@
     if ((overview || []).length >= 40 || (detail || []).length >= 1000) throw new Error('消費資料已達讀取上限，請先擴充範圍。');
     const grouped = new Map(), seen = new Set();
     for (const row of records(overview, ['月份','品牌代碼','客群','到店數','消費數','消費金額'])) {
-      if (row['品牌代碼'] !== 'JY') continue;
+      if (!isBrand(row)) continue;
       const m = consumptionMonth(row['月份']);
       if (m < 0) continue;
       const cohort = row['客群'] === '新客' ? 'new' : row['客群'] === '舊客' ? 'returning' : null;
@@ -147,7 +148,7 @@
       add(grouped, m, cohort, {total:consumptionValues(row),...Object.fromEntries(storeCodes.map(code=>[code,emptyConsumption()]))});
     }
     for (const row of records(detail, ['月份','品牌代碼','客群','統計基準','預約店','來源代碼','到店數','消費數','消費金額'])) {
-      if (row['品牌代碼'] !== 'JY') continue;
+      if (!isBrand(row)) continue;
       const m = consumptionMonth(row['月份']);
       if (m < 0) continue;
       const cohort = row['客群'] === '新客' ? 'new' : row['客群'] === '舊客' ? 'returning' : null;

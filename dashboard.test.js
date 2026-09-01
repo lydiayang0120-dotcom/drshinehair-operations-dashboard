@@ -12,7 +12,7 @@ function fixtures() {
       if(m<2) metaRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'月序':m+1,'分店':name,'實際花費':100,'訊息花費':80,'Meta詢問數':4,'Meta預算':120,'資料完整性':'已確認','查詢備註':''});
     }
     if(m<2) metaRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'月序':m+1,'分店':'品牌整體','實際花費':0,'訊息花費':0,'Meta詢問數':0,'Meta預算':0,'資料完整性':'已確認','查詢備註':'無法歸屬單店的品牌活動'});
-    for(const platform of ['Meta','LAP']) budgetRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'年度月序':m+1,'廣告平台':platform,'預算金額':300,'實際花費':m<2?(platform==='Meta'?300:10):null,'實際花費來源':'測試資料','填寫狀態':m<2?'已填':'待補'});
+    for(const platform of ['Meta','LAP']) budgetRows.push({'月份':data.months[m],'品牌代碼':'YJ','年度歸屬':2026,'年度月序':m+1,'廣告平台':platform,'預算金額':300,'實際花費':m<2?(platform==='Meta'?300:10):null,'實際花費來源':'測試資料','填寫狀態':m<2?'已填':'待補'});
   }
   const overview=[],detail=[];
   for(let m=0;m<2;m++) {
