@@ -140,7 +140,8 @@ test('UI login, refresh, four panels, consumption filters and logout',async()=>{
   assert.equal(elements.get('#sms-refresh').textContent,'更新資料');
   assert.match(elements.get('#sms-data-updated').textContent,/更新完成.*\d+:\d+:\d+/);
   assert.match(elements.get('#sms-meta-table').html,/<td>300<\/td>/);
-  assert.equal(elements.get('#sms-meta-rate').textContent,'66.7%');
+  assert.equal(elements.get('#sms-meta-rate').textContent,'100.0%');
+  assert.match(elements.get('#sms-meta-completeness').textContent,/年度規劃的每月執行目標/);
   assert.match(elements.get('#sms-budget-total').html,/7200</);
   assert.equal(elements.get('#sms-new-mode').value,'monthly');
   assert.equal(elements.get('#sms-new-store').value,'ty');
