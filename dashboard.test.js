@@ -84,6 +84,37 @@ test('Meta budget copy consistently means the monthly execution target',()=>{
   const rows=data.parseAll(ranges(fixtures())).metaRows;
   assert.equal(data.metaTotal(rows,'all').rate,400/480);
 });
+test('Meta attribution copy prioritizes ad set over campaign and keeps only shared spend at brand level',()=>{
+  const html=fs.readFileSync(__dirname+'/index.html','utf8');
+  assert.match(html,/分店歸屬先看廣告組合名稱，再看行銷活動名稱/);
+  assert.match(html,/即使上層活動名為「品牌」也須歸入該店/);
+  assert.match(html,/只有兩層都無法判定分店的共用花費才列入品牌整體/);
+});
+test('2026/08 ad-set reallocation preserves total and exposes Jiangcui overspend',()=>{
+  const rows=[
+    ['桃園漾澤',49036,42242,93,40000],
+    ['江翠漾澤',41491,38370,102,40000],
+    ['三峽漾澤',33376,30243,74,100000],
+    ['品牌整體',2584,0,0,40000]
+  ].map(([store,spend,messageSpend,inquiries,budget])=>({
+    '月份':'2026/08','品牌代碼':'JY','年度歸屬':2026,'月序':9,'分店':store,
+    '實際花費':spend,'訊息花費':messageSpend,'Meta詢問數':inquiries,'Meta預算':budget,
+    '資料完整性':'已確認','查詢備註':'2026/08 廣告組合層級複核'
+  }));
+  const parsed=data.parseMetaRows(table(rows));
+  assert.equal(data.metaTotal(parsed,'ty').s,49036);
+  const jiangcui=data.metaTotal(parsed,'jc');
+  assert.equal(jiangcui.s,41491);
+  assert.equal(jiangcui.s-jiangcui.b,1491);
+  assert.equal(data.metaTotal(parsed,'sx').s,33376);
+  assert.equal(data.metaTotal(parsed,'brand').s,2584);
+  const total=data.metaTotal(parsed,'all');
+  assert.equal(total.s,126487);
+  assert.equal(total.ms,110855);
+  assert.equal(total.q,269);
+  assert.equal(total.cpa,110855/269);
+  assert.equal(total.rate,126487/220000);
+});
 test('UI login, refresh, four panels, consumption filters and logout',async()=>{
   const elements=new Map(),intervals=[],tabs=[],panels=[];
   function el(id,tag='DIV',value='') {

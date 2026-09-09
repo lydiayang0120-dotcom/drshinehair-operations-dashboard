@@ -23,7 +23,7 @@
     @media(max-width:460px){ body{padding:0}.sms-auth-wall{min-height:100vh;border-radius:0}.sms-auth-card{padding:24px} }
   </style>
   <script src="config.js"></script>
-  <script src="dashboard-data.js?v=20260909-new-customer-arrivals"></script>
+  <script src="dashboard-data.js?v=20260909-meta-adset-v02"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -314,7 +314,7 @@
       <div class="sms-panel">
         <div class="sms-panel-head"><h2>資料口徑</h2></div>
         <p class="sms-note" id="sms-meta-completeness"></p>
-        <p class="sms-note">僅使用 Meta 平台「訊息對話開始次數」，不納入客服人工登記詢問數。整體數字含無法歸屬單店的品牌整體活動；切換單店時只顯示活動名稱可明確歸店的資料。</p>
+        <p class="sms-note">僅使用 Meta 平台「訊息對話開始次數」，不納入客服人工登記詢問數。分店歸屬先看廣告組合名稱，再看行銷活動名稱；廣告組合已標示分店時，即使上層活動名為「品牌」也須歸入該店。只有兩層都無法判定分店的共用花費才列入品牌整體。</p>
       </div>
     </div>
     <div class="sms-panel">
@@ -351,7 +351,7 @@
     </div>
   </section>
 
-  <script src="dashboard.js?v=20260831-jy-v01"></script>
+  <script src="dashboard.js?v=20260909-meta-adset-v02"></script>
 </div>
 
 </body>
