@@ -8,7 +8,7 @@ function fixtures() {
   const newRows=[],metaRows=[],budgetRows=[];
   for(let m=0;m<12;m++) {
     for(const name of ['桃園漾澤','江翠漾澤','三峽漾澤']) {
-      newRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'年度月序':m+1,'分店':name,'資料狀態':m<2?'已匯入':'待匯入','實際新客':name==='桃園漾澤'?1:name==='江翠漾澤'?2:0,'新客目標':10});
+      newRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'年度月序':m+1,'分店':name,'資料狀態':m<2?'已匯入':'待匯入','實際新客':name==='桃園漾澤'?2:name==='江翠漾澤'?4:0,'新客目標':10});
       if(m<2) metaRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'月序':m+1,'分店':name,'實際花費':100,'訊息花費':80,'Meta詢問數':4,'Meta預算':120,'資料完整性':'已確認','查詢備註':''});
     }
     if(m<2) metaRows.push({'月份':data.months[m],'品牌代碼':'JY','年度歸屬':2026,'月序':m+1,'分店':'品牌整體','實際花費':0,'訊息花費':0,'Meta詢問數':0,'Meta預算':0,'資料完整性':'已確認','查詢備註':'無法歸屬單店的品牌活動'});
@@ -116,7 +116,7 @@ test('UI login, refresh, four panels, consumption filters and logout',async()=>{
   intervals[0]();oauth.callback({access_token:'synthetic-token',expires_in:3600});
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(root.hidden,false);assert.equal(reads,2);
-  assert.match(elements.get('#sms-new-actual').html,/6</);
+  assert.match(elements.get('#sms-new-actual').html,/12</);
   assert.match(elements.get('#sms-meta-cpa').html,/20</);
   assert.match(elements.get('#sms-meta-completeness').textContent,/每月執行目標/);
   assert.match(elements.get('#sms-budget-total').html,/7200</);
@@ -130,7 +130,7 @@ test('UI login, refresh, four panels, consumption filters and logout',async()=>{
   assert.doesNotMatch(elements.get('#sms-consumption-table').html,/2025\/12/);
   elements.get('#sms-new-mode').value='monthly';elements.get('#sms-new-store').value='ty';
   elements.get('#sms-new-mode').events.change();
-  assert.match(elements.get('#sms-new-actual').html,/1</);
+  assert.match(elements.get('#sms-new-actual').html,/2</);
   let releaseFetch;
   fetchGate=new Promise(resolve=>{releaseFetch=resolve;});nextBudget=150;
   const refreshing=elements.get('#sms-refresh').events.click();
@@ -205,7 +205,7 @@ test('three-store totals and missing targets never become zero targets',()=>{
   assert.equal(data.budgetAggregate(parsed.budgetRows[0],'all').a,null);
 });
 
-test('new-customer and consumption mismatches fail closed',()=>{
+test('new-customer and arrival mismatches fail closed',()=>{
   const raw=fixtures();raw[0][0]['實際新客']=9;
-  assert.throws(()=>data.parseAll(ranges(raw)),/新客實績與分店消費/);
+  assert.throws(()=>data.parseAll(ranges(raw)),/新客實績與分店到店/);
 });

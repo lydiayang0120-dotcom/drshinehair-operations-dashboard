@@ -194,7 +194,7 @@
     const consumptionRows = parseConsumptionRows(ranges[3]?.values, ranges[4]?.values);
     if(newRows.length!==consumptionRows.length) throw new Error('新客與消費月份不一致。');
     for(const row of newRows) for(const code of storeCodes) {
-      if(row[code].a!==consumptionRows.find(r=>r.m===row.m)?.new[code].count) throw new Error('新客實績與分店消費數不一致。');
+      if(row[code].a!==consumptionRows.find(r=>r.m===row.m)?.new[code].arrivals) throw new Error('新客實績與分店到店數不一致。');
     }
     return {newRows, metaRows, budgetRows, consumptionRows};
   }
