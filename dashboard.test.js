@@ -149,7 +149,7 @@ test('UI login, refresh, four panels, consumption filters and logout',async()=>{
   assert.equal(root.hidden,false);assert.equal(reads,2);
   assert.match(elements.get('#sms-new-actual').html,/12</);
   assert.match(elements.get('#sms-meta-cpa').html,/20</);
-  assert.match(elements.get('#sms-meta-completeness').textContent,/每月執行目標/);
+  assert.match(elements.get('#sms-meta-completeness').textContent,/年度預算.*每月核定值/);
   assert.match(elements.get('#sms-budget-total').html,/7200</);
   tabs[1].events.click();
   assert.equal(panels[1].hidden,false);assert.equal(panels[0].hidden,true);
@@ -176,7 +176,12 @@ test('UI login, refresh, four panels, consumption filters and logout',async()=>{
   assert.match(elements.get('#sms-data-updated').textContent,/更新完成.*\d+:\d+:\d+/);
   assert.match(elements.get('#sms-meta-table').html,/<td>300<\/td>/);
   assert.equal(elements.get('#sms-meta-rate').textContent,'100.0%');
-  assert.match(elements.get('#sms-meta-completeness').textContent,/年度規劃的每月執行目標/);
+  assert.match(elements.get('#sms-meta-completeness').textContent,/年度預算.*每月核定值/);
+  elements.get('#sms-meta-store').value='ty';
+  elements.get('#sms-meta-store').events.change();
+  assert.match(elements.get('#sms-meta-table').html,/<td>150<\/td>/);
+  assert.equal(elements.get('#sms-meta-rate').textContent,'66.7%');
+  assert.match(elements.get('#sms-meta-completeness').textContent,/Meta月度KPI.*G 欄執行目標/);
   assert.match(elements.get('#sms-budget-total').html,/7200</);
   assert.equal(elements.get('#sms-new-mode').value,'monthly');
   assert.equal(elements.get('#sms-new-store').value,'ty');
